@@ -68,7 +68,7 @@ const coffeeShop = (props) => {
           />
         </div>
         <div className={cls("glass", styles.col2)}>
-          <div className={styles.icobWrapper}>
+          <div className={styles.iconWrapper}>
             <Image
               src="/static/icons/places.svg"
               width="24"
@@ -77,18 +77,18 @@ const coffeeShop = (props) => {
             />
             <p className={styles.text}>{neighbourhood}</p>
           </div>
-          <div className={styles.icobWrapper}>
+          <div className={styles.iconWrapper}>
             <Image
-              src="/static/icons/places.svg"
+              src="/static/icons/nearMe.svg"
               width="24"
               height="24"
               alt="places icon"
             />
             <p className={styles.text}>{address}</p>
           </div>
-          <div className={styles.icobWrapper}>
+          <div className={styles.iconWrapper}>
             <Image
-              src="/static/icons/places.svg"
+              src="/static/icons/star.svg"
               width="24"
               height="24"
               alt="places icon"
