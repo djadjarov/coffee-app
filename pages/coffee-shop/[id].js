@@ -5,13 +5,15 @@ import Head from "next/head";
 import styles from "../../styles/coffee-store.module.css";
 import Image from "next/image";
 import cls from "classnames";
+import {fetchCoffeStores} from "../../lib/coffee-stores"
 
 export async function getStaticProps(staticProps) {
+  const coffeeStores = await fetchCoffeStores();
   const params = staticProps.params;
   console.log(params);
   return {
     props: {
-      coffeeStores: coffeeStoresData.find((coffeStore) => {
+      coffeeStores: coffeeStores.find((coffeStore) => {
         return coffeStore.id.toString() === params.id;
       }),
     },
@@ -19,9 +21,10 @@ export async function getStaticProps(staticProps) {
 }
 
 export async function getStaticPaths() {
-  const paths = coffeeStoresData.map((coffeeStore) => {
+  const coffeeStores = await fetchCoffeStores();
+  const paths = coffeeStores.map((coffeeStore) => {
     return {
-      params: { id: coffeeStore.id.toString() },
+      params: { id: coffeeStore.id.toString(), },
     };
   });
 
@@ -39,7 +42,7 @@ const coffeeShop = (props) => {
     return <div>Loading</div>;
   }
 
-  const { name, address, neighbourhood, imgUrl } = props.coffeeStores;
+  const { name, address, imgUrl } = props.coffeeStores;
 
   const handleUpvoteButton = () => {
     console.log("button");
@@ -75,7 +78,7 @@ const coffeeShop = (props) => {
               height="24"
               alt="places icon"
             />
-            <p className={styles.text}>{neighbourhood}</p>
+            <p className={styles.text}>{address}</p>
           </div>
           <div className={styles.iconWrapper}>
             <Image

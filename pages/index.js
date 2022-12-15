@@ -4,26 +4,16 @@ import styles from "../styles/Home.module.css";
 import Banner from "../components/Banner";
 import Card from "../components/Card";
 import coffeeStoresData from "../data/coffee-stores.json";
+import {fetchCoffeStores} from "../lib/coffee-stores"
 
 export async function getStaticProps(context) {
-  console.log("Hello there");
 
-  const options = {
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-      Authorization: 'fsq3xR2XxD96h1XsMEJyMCCGdaRu9e/OtHmUoP5tmGU7HkY='
-    }
-  };
-  
-  const response = await fetch('https://api.foursquare.com/v3/places/search?query=coffee&ll=42.69794855479368%2C23.312299554784257&limit=6', options)
-    const data = await response.json();
-    console.log(data);
-    // .catch(err => console.error(err));
+  const coffeeStores = await fetchCoffeStores();
+  console.log(coffeeStores);
 
   return {
     props: {
-      coffeeStores: data.results,
+      coffeeStores,
     },
   }
 }
@@ -54,11 +44,14 @@ export default function Home(props) {
           return (
             
             <Card
-              key={coffeeStore.fsq_id}
+              key={coffeeStore.id}
               className={styles.card}
               name={coffeeStore.name}
-              href={`/coffee-shop/${coffeeStore.fsq_id}`}
-              imgURL="https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+              href={`/coffee-shop/${coffeeStore.id}`}
+              imgUrl={
+                coffeeStore.imgUrl ||
+                "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+              }
               alt={coffeeStore.name}
             />)
           })}
