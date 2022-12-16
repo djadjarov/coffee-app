@@ -4,10 +4,10 @@ import styles from "../styles/Home.module.css";
 import Banner from "../components/Banner";
 import Card from "../components/Card";
 import coffeeStoresData from "../data/coffee-stores.json";
-import {fetchCoffeStores} from "../lib/coffee-stores"
+import { fetchCoffeStores } from "../lib/coffee-stores";
+import useTrackLocation from "../hooks/use-track-location";
 
 export async function getStaticProps(context) {
-
   const coffeeStores = await fetchCoffeStores();
   console.log(coffeeStores);
 
@@ -15,14 +15,20 @@ export async function getStaticProps(context) {
     props: {
       coffeeStores,
     },
-  }
+  };
 }
 
 export default function Home(props) {
   console.log(props);
 
+  const { handleTrackLocation, latLong, locationErrorMesg } =
+    useTrackLocation();
+
+  console.log({ latLong, locationErrorMesg });
+
   const handleBannerBtnClick = () => {
     console.log("test");
+    handleTrackLocation();
   };
 
   return (
@@ -41,19 +47,19 @@ export default function Home(props) {
         <h2>Nearby stores</h2>
         <div className={styles.cardLayout}>
           {props.coffeeStores.map((coffeeStore) => {
-          return (
-            
-            <Card
-              key={coffeeStore.id}
-              className={styles.card}
-              name={coffeeStore.name}
-              href={`/coffee-shop/${coffeeStore.id}`}
-              imgUrl={
-                coffeeStore.imgUrl ||
-                "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
-              }
-              alt={coffeeStore.name}
-            />)
+            return (
+              <Card
+                key={coffeeStore.id}
+                className={styles.card}
+                name={coffeeStore.name}
+                href={`/coffee-shop/${coffeeStore.id}`}
+                imgUrl={
+                  coffeeStore.imgUrl ||
+                  "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+                }
+                alt={coffeeStore.name}
+              />
+            );
           })}
         </div>
       </main>
