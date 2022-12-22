@@ -6,14 +6,17 @@ import Card from "../components/Card";
 import coffeeStoresData from "../data/coffee-stores.json";
 import { fetchCoffeStores } from "../lib/coffee-stores";
 import useTrackLocation from "../hooks/use-track-location";
+import { useEffect, useState, useContext  } from "react";
+import { ACTION_TYPES, StoreContext } from "../store/store-context";
+
 
 export async function getStaticProps(context) {
-  const coffeeStores = await fetchCoffeStores();
-  console.log(coffeeStores);
+  const coffeeStoresProps = await fetchCoffeStores();
+  console.log(coffeeStoresProps);
 
   return {
     props: {
-      coffeeStores,
+      coffeeStoresProps,
     },
   };
 }
@@ -21,13 +24,43 @@ export async function getStaticProps(context) {
 export default function Home(props) {
   console.log(props);
 
-  const { handleTrackLocation, latLong, locationErrorMesg } =
+  const { handleTrackLocation, locationErrorMesg, isLoadingLocation } =
     useTrackLocation();
 
-  console.log({ latLong, locationErrorMesg });
+  // console.log({ latLong, locationErrorMesg, isLoadingLocation });
+
+  // const [coffeeStores, setCoffeeStores] = useState("");
+  const [coffeeStoresError, setCoffeeStoresError] = useState(null);
+  const { dispatch, state } = useContext(StoreContext);
+  const { coffeeStores, latLong } = state;
+
+
+  useEffect(() => {
+    async function setCoffeeStoresByLocation() {
+      if (latLong) {
+        try {
+          const fetchedCoffeeStores = await fetchCoffeStores(latLong, 30);
+          console.log({ fetchedCoffeeStores });
+          // setCoffeeStores(fetchedCoffeeStores);
+          dispatch({
+            type: ACTION_TYPES.SET_COFFEE_STORES,
+            payload: {
+              coffeeStores: fetchedCoffeeStores,
+            },
+          });
+          //set coffee stores
+        } catch (error) {
+          //set error
+          setCoffeeStoresError(error.message);
+        }
+      }
+    };
+    setCoffeeStoresByLocation();
+  }, [latLong]);
+
+  console.log({coffeeStores});
 
   const handleBannerBtnClick = () => {
-    console.log("test");
     handleTrackLocation();
   };
 
@@ -41,12 +74,43 @@ export default function Home(props) {
 
       <main className={styles.main}>
         <Banner
-          buttonText="Discover shops nearby"
+          buttonText={
+            !isLoadingLocation ? "Discover shops nearby" : "Loading..."
+          }
           handleOnClick={handleBannerBtnClick}
         />
-        <h2>Nearby stores</h2>
+        {locationErrorMesg && <p>Something went wrong: {locationErrorMesg}</p>}
+        {coffeeStoresError && <p>Something went wrong: {coffeeStoresError}</p>}
+
+
+        
+        {coffeeStores.length > 0 && (
+          <>
+            <h2>Nearby stores</h2>
+            <div className={styles.cardLayout}>
+              {console.log(coffeeStores)}
+              {coffeeStores.map((coffeeStore) => {
+                return (
+                  <Card
+                    key={coffeeStore.id}
+                    className={styles.card}
+                    name={coffeeStore.name}
+                    href={`/coffee-shop/${coffeeStore.id}`}
+                    imgUrl={
+                      coffeeStore.imgUrl ||
+                      "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+                    }
+                    alt={coffeeStore.name}
+                  />
+                );
+              })}
+            </div>
+            </>
+        )}
+
+        <h2>Coffee stores in Plovdiv</h2>
         <div className={styles.cardLayout}>
-          {props.coffeeStores.map((coffeeStore) => {
+          {props.coffeeStoresProps.map((coffeeStore) => {
             return (
               <Card
                 key={coffeeStore.id}

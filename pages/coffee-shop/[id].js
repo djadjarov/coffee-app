@@ -6,16 +6,23 @@ import styles from "../../styles/coffee-store.module.css";
 import Image from "next/image";
 import cls from "classnames";
 import {fetchCoffeStores} from "../../lib/coffee-stores"
+import { useContext, useState, useEffect } from "react";
+
+import { StoreContext } from "../../store/store-context";
+
+import { isEmpty } from "../../utils";
 
 export async function getStaticProps(staticProps) {
   const coffeeStores = await fetchCoffeStores();
   const params = staticProps.params;
+  const findCoffeStoreBId = coffeeStores.find((coffeStore) => {
+    return coffeStore.id.toString() === params.id;
+  });
+
   console.log(params);
   return {
     props: {
-      coffeeStores: coffeeStores.find((coffeStore) => {
-        return coffeStore.id.toString() === params.id;
-      }),
+      coffeeStore: findCoffeStoreBId ? findCoffeStoreBId : {},
     },
   };
 }
@@ -34,7 +41,7 @@ export async function getStaticPaths() {
   };
 }
 
-const coffeeShop = (props) => {
+const coffeeShop = (initialProps) => {
   const router = useRouter();
   // console.log(props.coffeeStores.address);
 
@@ -42,7 +49,27 @@ const coffeeShop = (props) => {
     return <div>Loading</div>;
   }
 
-  const { name, address, imgUrl } = props.coffeeStores;
+  // const { name, address, imgUrl } = props.coffeeStores;
+  const id = router.query.id;
+
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+
+  const {
+    state: { coffeeStores },
+  } = useContext(StoreContext);
+
+  useEffect(() => {
+    if (isEmpty(initialProps.coffeeStore)) {
+      if (coffeeStores.length > 0) {
+        const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+          return coffeeStore.id.toString() === id; //dynamic id
+        });
+        setCoffeeStore(findCoffeeStoreById);
+      }
+    }
+  }, [id]);
+
+  const { name, address, imgUrl } = coffeeStore;
 
   const handleUpvoteButton = () => {
     console.log("button");
